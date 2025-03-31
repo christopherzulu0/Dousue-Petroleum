@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useState } from "react"
 import Link from "next/link"
 import { MapPin, Briefcase, DollarSign, Clock, ChevronLeft, CheckCircle, Users, Phone, Mail } from "lucide-react"
@@ -10,8 +11,29 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
 
+interface JobData {
+  id: string;
+  title: string;
+  location: string;
+  type: string;
+  salary: string;
+  postedDate: string;
+  description: string;
+  requirements: string[];
+  responsibilities: string[];
+  benefits: string[];
+}
+
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  resume: File | null;
+  coverLetter: string;
+}
+
 // This would normally come from a database or API
-const getJobData = (jobId) => {
+const getJobData = (jobId: string): JobData | undefined => {
   // Sample job data
   const jobs = [
     {
@@ -418,16 +440,15 @@ const getJobData = (jobId) => {
   return jobs.find((job) => job.id === jobId) || null
 }
 
-export default function PositionDetailPage({ params }) {
-  const job = getJobData(params.id);
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+export default function PositionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = React.use(params);
+  const job = getJobData(resolvedParams.id);
+  const [formData, setFormData] = useState<FormData>({
+    name: "",
     email: "",
     phone: "",
     resume: null,
     coverLetter: "",
-    termsAccepted: false
   });
   
   if (!job) {
@@ -442,22 +463,23 @@ export default function PositionDetailPage({ params }) {
     );
   }
   
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: value,
     }));
   };
   
-  const handleFileChange = (e) => {
-    setFormData(prev => ({
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setFormData((prev) => ({
       ...prev,
-      [e.target.name]: e.target.files[0]
+      resume: file,
     }));
   };
   
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // In a real application, this would submit the form data to a server
     console.log("Form submitted:", formData);
@@ -759,5 +781,23 @@ export default function PositionDetailPage({ params }) {
                       </Button>
                       <Button variant="outline" size="icon" className="rounded-full">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                          <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632\
+                          <path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/>
+                        </svg>
+                      </Button>
+                      <Button variant="outline" size="icon" className="rounded-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                          <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z"/>
+                        </svg>
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  );
+}
 
